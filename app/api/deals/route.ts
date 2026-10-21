@@ -56,7 +56,9 @@ const feeds: Feed[] = [
 ];
 
 const cabinTopic =
-  /\b(business class|first class|lie-?flat|qsuites?|polaris|delta one|mint|premium cabin|mistake fare|error fare|award alert|transfer bonus|business|first)\b/i;
+  /\b(business class|first class|lie-?flat|qsuites?|polaris|delta one|mint|premium cabin|mistake fare|error fare|award alert|transfer bonus)\b/i;
+const excludedTopic =
+  /(marriott|bonvoy|hilton|hyatt|\bihg\b|wyndham|accor|hotel|credit card|card offer|venture x|sapphire|platinum card|gold card|sign-?up bonus|welcome offer|aadvantage business|\bbusiness (card|bill|spend|promo)\b)/i;
 const blogDealTopic = /(fare|deal|award|bonus|sale|\$\d|from \d|miles each way|points)/i;
 
 const parser = new XMLParser({
@@ -100,7 +102,14 @@ function parseFeed(xml: string, feed: Feed): Deal[] {
 
   return entries.flatMap((entry) => {
     let title = text(entry.title).trim();
-    if (!title || /^\[Expired\]/i.test(title) || !cabinTopic.test(title)) return [];
+    if (
+      !title ||
+      /^\[Expired\]/i.test(title) ||
+      !cabinTopic.test(title) ||
+      excludedTopic.test(title)
+    ) {
+      return [];
+    }
     if (!feed.google && !blogDealTopic.test(title)) return [];
 
     let source = feed.source;
